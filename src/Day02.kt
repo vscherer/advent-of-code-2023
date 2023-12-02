@@ -1,63 +1,48 @@
-import java.lang.Integer.max
-
 fun main() {
 
-    val availableCubes = mapOf(
-        'r' to 12,
-        'g' to 13,
-        'b' to 14,
-    )
-
-    fun String.getGameNumber(): Int {
+    fun String.extractGameNumber(): Int {
         val pattern = """\d+""".toRegex()
-        return pattern.find(this)?.value?.toInt()?: throw Exception("Incorrectly formatted line: $this")
+        return pattern.find(this)?.value?.toInt() ?: throw Exception("Incorrectly formatted line: $this")
     }
 
-    fun getSamples(line: String) : List<Pair<Int, Char>> {
-        println("Checking: $line")
+    fun String.extractSamples(): List<CubeSample> {
         val pattern = """\d* ([rgb])""".toRegex()
-        val matches = pattern.findAll(line)
+        val matches = pattern.findAll(this)
         return matches.map { match ->
-            match.value.dropLast(2).toInt() to match.value.last()
+            CubeSample(
+                color = match.value.last(),
+                quantity = match.value.dropLast(2).toInt()
+            )
         }.toList()
     }
 
-    fun isValidGame(samples: List<Pair<Int, Char>>): Boolean {
-        samples.forEach { (quantity, color) ->
-            if (quantity > availableCubes[color]!!) {
-                println("Nope: $quantity $color too high")
-                return false
+    fun isValidGame(line: String): Boolean {
+        return line
+            .extractSamples()
+            .none {
+                it.quantity > AVAILABLE_CUBES_FOR_PART_ONE[it.color]!!
             }
-        }
-        println("possible")
-        return true
     }
 
-    fun calculatePower(samples: List<Pair<Int, Char>>): Int {
-        val necessaryDice = samples.groupingBy{ it.second }.fold (0) { accumulator, element ->
-            max(accumulator, element.first)
-        }
-        println("Max: $necessaryDice")
-        return necessaryDice.values.reduce { a, b -> a*b }
+    fun calculatePower(line: String): Int {
+        return line
+            .extractSamples()
+            .groupBy(
+                keySelector = { it.color },
+                valueTransform = { it.quantity })
+            .values
+            .map { it.max() }
+            .reduce(Int::times)
     }
 
     fun part1(input: List<String>): Int {
-        return input.sumOf { line ->
-            val samples = getSamples(line)
-            if (isValidGame(samples)) {
-                println("adding: ${line.getGameNumber()}")
-                line.getGameNumber()
-            } else {
-                0
-            }
-        }
+        return input
+            .filter { isValidGame(it) }
+            .sumOf { it.extractGameNumber() }
     }
 
     fun part2(input: List<String>): Int {
-        return input.sumOf {line ->
-            val samples = getSamples(line)
-            calculatePower(samples)
-        }
+        return input.sumOf { calculatePower(it) }
     }
 
     val testInput1 = readInput("Day02_test")
@@ -70,3 +55,11 @@ fun main() {
     part1(input).println()
     part2(input).println()
 }
+
+data class CubeSample(val color: Char, val quantity: Int)
+
+val AVAILABLE_CUBES_FOR_PART_ONE = mapOf(
+    'r' to 12,
+    'g' to 13,
+    'b' to 14,
+)
