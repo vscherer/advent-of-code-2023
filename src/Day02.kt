@@ -1,19 +1,17 @@
 fun main() {
 
     fun String.extractGameNumber(): Int {
-        val pattern = """\d+""".toRegex()
-        return pattern.find(this)?.value?.toInt() ?: throw Exception("Incorrectly formatted line: $this")
+        return extractFirst("""\d+""")?.toInt() ?: throw Exception("Incorrectly formatted line: $this")
     }
 
     fun String.extractSamples(): List<CubeSample> {
-        val pattern = """\d* ([rgb])""".toRegex()
-        val matches = pattern.findAll(this)
-        return matches.map { match ->
-            CubeSample(
-                color = match.value.last(),
-                quantity = match.value.dropLast(2).toInt()
-            )
-        }.toList()
+        return extractAll("""\d* ([rgb])""")
+            .map { sample ->
+                CubeSample(
+                    color = sample.last(),
+                    quantity = sample.dropLast(2).toInt()
+                )
+            }.toList()
     }
 
     fun isValidGame(line: String): Boolean {

@@ -19,3 +19,11 @@ fun String.md5() = BigInteger(1, MessageDigest.getInstance("MD5").digest(toByteA
  * The cleaner shorthand for printing output.
  */
 fun Any?.println() = println(this)
+
+fun String.findFirst(regex: String) = regex.toRegex().find(this)
+
+fun String.findAll(regex: String) = regex.toRegex().findAll(this)
+
+fun String.extractFirst(regex: String) = regex.toRegex().find(this)?.value
+
+fun String.extractAll(regex: String) = regex.toRegex().findAll(this).map { it.value }.toList()
