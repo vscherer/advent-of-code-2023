@@ -18,6 +18,10 @@ fun main() {
 //    runPart2()
 }
 
+/**
+ * //////////////////////// AoC setup code \\\\\\\\\\\\\\\\\\\\\\\\\\\
+ */
+
 private fun runPart1() = part1(mainInput)
 
 private fun runPart2() = part2(mainInput)
