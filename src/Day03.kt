@@ -1,15 +1,17 @@
 private const val DAY = "03"
 private const val SOLUTION_TEST_1 = 4361
-private const val SOLUTION_TEST_2 = 0
+private const val SOLUTION_TEST_2 = 467835
 
 data class PartNumber(val value: Int, val line: Int, val range: IntRange)
 
 private lateinit var symbolPositions: MutableList<List<Int>>
 private lateinit var numbers: MutableList<PartNumber>
+private lateinit var potentialGearPositions: MutableList<List<Int>>
 
 private fun parseInput(input: List<String>) {
     symbolPositions = mutableListOf()
     numbers = mutableListOf()
+    potentialGearPositions = mutableListOf()
 
     input.forEachIndexed { lineNumber, text ->
         symbolPositions.add(
@@ -24,12 +26,19 @@ private fun parseInput(input: List<String>) {
                 .findAll("""\d+""")
                 .map { PartNumber(it.value.toInt(), lineNumber, it.range) }
         )
+
+        potentialGearPositions.add(
+            text
+                .findAll("""\*""")
+                .map { it.range.first }
+                .toList()
+        )
     }
 }
 
 private fun IntRange.extendedByOne() = IntRange(first - 1, last + 1)
 
-private fun PartNumber.isAdjacentToSymbol(): Boolean {
+private fun PartNumber.isAdjacentToAnySymbol(): Boolean {
     val searchRange = range.extendedByOne()
 
     val hasSymbolAbove = if (line > 0) {
@@ -43,24 +52,41 @@ private fun PartNumber.isAdjacentToSymbol(): Boolean {
     return hasSymbolAbove || hasSymbolOnLine || hasSymbolBelow
 }
 
+private fun PartNumber.isAdjacentToGear(gearPosition: Pair<Int, Int>): Boolean {
+    return (gearPosition.first in line - 1..line + 1)
+            && (gearPosition.second in range.extendedByOne())
+}
+
 private fun part1(input: List<String>): Int {
     parseInput(input)
 
     return numbers
-        .filter { it.isAdjacentToSymbol() }
+        .filter { it.isAdjacentToAnySymbol() }
         .sumOf { it.value }
 }
 
 private fun part2(input: List<String>): Int {
-    return 0
+    parseInput(input)
+
+    val potentialGearPositionsFlattened = potentialGearPositions
+        .flatMapIndexed { line, gearsOnLine -> gearsOnLine.map { Pair(line, it) } }
+
+    val adjacentNumbersPerPotentialGear = potentialGearPositionsFlattened
+        .map { gearPosition ->
+            numbers.filter { it.isAdjacentToGear(gearPosition) }
+        }
+
+    val actualGears = adjacentNumbersPerPotentialGear.filter { it.size == 2 }
+
+    return actualGears.sumOf { it.first().value * it.last().value }
 }
 
 fun main() {
     testPart1()
     runPart1()
 
-//    testPart2()
-//    runPart2()
+    testPart2()
+    runPart2()
 }
 
 /**
