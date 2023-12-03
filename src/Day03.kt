@@ -57,7 +57,7 @@ private fun part2(input: List<String>): Int {
 
 fun main() {
     testPart1()
-//    runPart1()
+    runPart1()
 
 //    testPart2()
 //    runPart2()
@@ -67,9 +67,9 @@ fun main() {
  * //////////////////////// AoC setup code \\\\\\\\\\\\\\\\\\\\\\\\\\\
  */
 
-private fun runPart1() = part1(mainInput)
+private fun runPart1() = println(part1(mainInput))
 
-private fun runPart2() = part2(mainInput)
+private fun runPart2() = println(part2(mainInput))
 
 private fun testPart1() {
     val result = part1(testInput1)
