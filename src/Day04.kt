@@ -2,7 +2,7 @@ import kotlin.math.pow
 
 private const val DAY = "04"
 private const val SOLUTION_TEST_1 = 13
-private const val SOLUTION_TEST_2 = 0
+private const val SOLUTION_TEST_2 = 30
 
 private data class Card(val winningNumbers: Set<Int>, val myNumbers: Set<Int>)
 
@@ -16,27 +16,45 @@ private fun parseInput(line: String): Card {
     return Card(winning, mine)
 }
 
-private fun calculatePoints(card: Card): Int {
-    val hits = card.myNumbers.intersect(card.winningNumbers).count()
+private fun Card.calculateHits() = myNumbers.intersect(winningNumbers).count()
+
+private fun Card.calculatePoints(): Int {
+    val hits = calculateHits()
     return 2.toDouble().pow(hits - 1).toInt()
 }
 
 private fun part1(input: List<String>): Int {
     return input
-        .map { parseInput(it) }
-        .sumOf { calculatePoints(it) }
+        .map(::parseInput)
+        .sumOf(Card::calculatePoints)
 }
 
 private fun part2(input: List<String>): Int {
-    return 0
+    val copiesPerCard = MutableList(input.size) { 1 }
+
+    val hitsPerCard = input
+        .map(::parseInput)
+        .map(Card::calculateHits)
+
+    hitsPerCard.forEachIndexed { index, hitsOfThisCard ->
+        val copiesOfThisCard = copiesPerCard[index]
+
+        if (hitsOfThisCard > 0) {
+            for (i in index + 1..index + hitsOfThisCard) {
+                copiesPerCard[i] += copiesOfThisCard
+            }
+        }
+    }
+
+    return copiesPerCard.sum()
 }
 
 fun main() {
     testPart1()
     runPart1()
 
-//    testPart2()
-//    runPart2()
+    testPart2()
+    runPart2()
 }
 
 /**
