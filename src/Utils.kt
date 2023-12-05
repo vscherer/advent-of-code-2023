@@ -29,3 +29,5 @@ fun String.extractFirst(regex: String) = regex.toRegex().find(this)?.value
 fun String.extractAll(regex: String) = regex.toRegex().findAll(this).map { it.value }.toList()
 
 fun String.extractAllInts(): List<Int> = extractAll("""\d+""").map(String::toInt)
+
+fun String.extractAllLongs(): List<Long> = extractAll("""\d+""").map(String::toLong)
