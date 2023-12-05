@@ -43,4 +43,8 @@ private val testInput1: List<String>
     get() = readInput("Day${DAY}_test")
 
 private val testInput2: List<String>
-    get() = readInput("Day${DAY}_test2")
+    get() = try {
+        readInput("Day${DAY}_test2")
+    } catch (_: Exception) {
+        testInput1
+    }
