@@ -1,6 +1,6 @@
 private const val DAY = "07"
 private const val SOLUTION_TEST_1 = 6440
-private const val SOLUTION_TEST_2 = 0
+private const val SOLUTION_TEST_2 = 5905
 
 private data class Hand(val cards: String, val bid: Int) {
     companion object {
@@ -29,15 +29,32 @@ private enum class Type(val value: Int) {
     ONE(10),
 }
 
+private var hasJokers: Boolean = false
+
 private val Hand.type: Type
     get() {
-        val counts = this.cards.groupingBy { it }.eachCount()
-        val max = counts.values.max()
+        val nrOfJokers = if (hasJokers) this.cards.count { it == 'J' } else 0
+        val cards = this.cards.filter { !hasJokers || it != 'J' }
+
+        var counts = cards
+            .groupingBy { it }
+            .eachCount()
+            .values
+            .sortedDescending()
+            .toMutableList()
+
+        if (counts.size > 0) {
+            counts[0] += nrOfJokers
+        } else { // Only jokers
+            counts = mutableListOf(nrOfJokers)
+        }
+
+        val max = counts.max()
         return when (max) {
             5 -> Type.FIVE
             4 -> Type.FOUR
-            3 -> if (counts.containsValue(2)) Type.FULL_HOUSE else Type.THREE
-            2 -> if (counts.filter { it.value == 2 }.count() == 2) Type.TWO_PAIRS else Type.TWO
+            3 -> if (counts.contains(2)) Type.FULL_HOUSE else Type.THREE
+            2 -> if (counts.count { it == 2 } == 2) Type.TWO_PAIRS else Type.TWO
             else -> Type.ONE
         }
     }
@@ -46,7 +63,7 @@ private fun valueOf(card: Char): Int = when (card) {
     'A' -> 14
     'K' -> 13
     'Q' -> 12
-    'J' -> 11
+    'J' -> if (hasJokers) 1 else 11
     'T' -> 10
     else -> card.digitToInt()
 }
@@ -59,24 +76,28 @@ private fun parseInput(input: List<String>): List<Hand> {
     }
 }
 
-private fun part1(input: List<String>): Int {
-    val hands = parseInput(input)
-    return hands.sortedWith(comparator = Hand.HandComparator)
+private fun List<Hand>.computeWinnings(): Int {
+    return sortedWith(comparator = Hand.HandComparator)
         .foldIndexed(0) { index, sum, hand ->
             sum + hand.bid * (index + 1)
         }
 }
 
+private fun part1(input: List<String>): Int {
+    return parseInput(input).computeWinnings()
+}
+
 private fun part2(input: List<String>): Int {
-    return 0
+    hasJokers = true
+    return parseInput(input).computeWinnings()
 }
 
 fun main() {
     testPart1()
     runPart1()
 
-//    testPart2()
-//    runPart2()
+    testPart2()
+    runPart2()
 }
 
 /**
