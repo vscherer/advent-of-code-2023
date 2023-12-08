@@ -31,3 +31,26 @@ fun String.extractAll(regex: String) = regex.toRegex().findAll(this).map { it.va
 fun String.extractAllInts(): List<Int> = extractAll("""\d+""").map(String::toInt)
 
 fun String.extractAllLongs(): List<Long> = extractAll("""\d+""").map(String::toLong)
+
+// Adapted from baeldung.com/kotlin/lcm
+fun lcm(a: Long, b: Long): Long {
+    val larger = if (a > b) a else b
+    val maxLcm = a * b
+    var lcm = larger
+    while (lcm <= maxLcm) {
+        if (lcm % a == 0L && lcm % b == 0L) {
+            return lcm
+        }
+        lcm += larger
+    }
+    return maxLcm
+}
+
+// Adapted from baeldung.com/kotlin/lcm
+fun List<Int>.calculateLCM(): Long {
+    var result = this[0].toLong()
+    for (i in 1 until size) {
+        result = lcm(result, this[i].toLong())
+    }
+    return result
+}
