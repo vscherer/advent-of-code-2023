@@ -28,9 +28,13 @@ fun String.extractFirst(regex: String) = regex.toRegex().find(this)?.value
 
 fun String.extractAll(regex: String) = regex.toRegex().findAll(this).map { it.value }.toList()
 
-fun String.extractAllInts(): List<Int> = extractAll("""\d+""").map(String::toInt)
+fun String.extractAllUnsignedInts(): List<Int> = extractAll("""\d+""").map(String::toInt)
 
-fun String.extractAllLongs(): List<Long> = extractAll("""\d+""").map(String::toLong)
+fun String.extractAllSignedInts(): List<Int> = extractAll("""-?\d+""").map(String::toInt)
+
+fun String.extractAllUnsignedLongs(): List<Long> = extractAll("""\d+""").map(String::toLong)
+
+fun String.extractAllSignedLongs(): List<Long> = extractAll("""-?\d+""").map(String::toLong)
 
 // Adapted from baeldung.com/kotlin/lcm
 fun lcm(a: Long, b: Long): Long {

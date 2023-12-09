@@ -29,12 +29,12 @@ private lateinit var maps: List<ConversionMap>
  */
 
 private fun parseSingleSeeds(input: String) {
-    seeds = input.extractAllLongs()
+    seeds = input.extractAllUnsignedLongs()
 }
 
 private fun parseSeedRanges(input: String) {
     seedRanges = input
-        .extractAllLongs()
+        .extractAllUnsignedLongs()
         .chunked(2)
         .map {
             val start = it.first()
@@ -59,7 +59,7 @@ private fun parseMaps(input: List<String>) {
 }
 
 private fun parseMapEntry(step: Int, line: String) {
-    val numbers = line.extractAllLongs()
+    val numbers = line.extractAllUnsignedLongs()
     val range = LongRange(numbers[1], numbers[1] + numbers[2] - 1)
     val conversion = numbers[0] - numbers[1]
 

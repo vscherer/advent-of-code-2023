@@ -10,7 +10,7 @@ private fun parseInput(line: String): Card {
     val (winning, mine) = line
         .substring(8) // Remove Card number
         .split(" | ")
-        .map { it.extractAllInts() }
+        .map { it.extractAllUnsignedInts() }
         .map(List<Int>::toSet)
 
     return Card(winning, mine)
