@@ -4,10 +4,8 @@ private const val DAY = "10"
 private const val SOLUTION_TEST_1 = 8
 private const val SOLUTION_TEST_2 = 10
 
-private typealias Grid = List<String>
-private typealias MutableGrid = MutableList<String>
-
-private fun Grid.toMutableGrid(): MutableGrid = this.toMutableList()
+private typealias StringGrid = List<String>
+private typealias MutableStringGrid = MutableList<String>
 
 private enum class Direction {
     NORTH,
@@ -25,14 +23,14 @@ private fun Pair<Int, Int>.moveOne(dir: Direction): Pair<Int, Int> {
     }
 }
 
-private fun Grid.get(coordinates: Pair<Int, Int>) = this[coordinates.first][coordinates.second]
-private fun MutableGrid.set(symbol: Char, coordinates: Pair<Int, Int>) {
+private fun StringGrid.get(coordinates: Pair<Int, Int>) = this[coordinates.first][coordinates.second]
+private fun MutableStringGrid.set(symbol: Char, coordinates: Pair<Int, Int>) {
     val sb = StringBuilder(this[coordinates.first])
     sb.setCharAt(coordinates.second, symbol)
     this[coordinates.first] = sb.toString()
 }
 
-private fun Grid.padWith(paddingChar: Char): Grid {
+private fun StringGrid.padWith(paddingChar: Char): StringGrid {
     val paddedSides = this
         .map { row ->
             row
@@ -48,7 +46,7 @@ private fun Grid.padWith(paddingChar: Char): Grid {
     }
 }
 
-private fun findStart(grid: Grid): Pair<Int, Int> {
+private fun findStart(grid: StringGrid): Pair<Int, Int> {
     grid.forEachIndexed { index, row ->
         val startPosition = row.indexOf('S')
         if (startPosition != -1) return Pair(index, startPosition)
@@ -57,7 +55,7 @@ private fun findStart(grid: Grid): Pair<Int, Int> {
     throw IllegalStateException("No Start in input")
 }
 
-private fun findStartDirection(grid: Grid, start: Pair<Int, Int>): Direction {
+private fun findStartDirection(grid: StringGrid, start: Pair<Int, Int>): Direction {
     return when {
         listOf('|', '7', 'F').contains(grid.get(start.moveOne(NORTH))) -> NORTH
         listOf('|', 'J', 'L').contains(grid.get(start.moveOne(SOUTH))) -> SOUTH
@@ -81,7 +79,7 @@ private fun findNextDirection(symbol: Char, direction: Direction): Direction {
     }
 }
 
-private fun countPath(grid: Grid, start: Pair<Int, Int>): Int {
+private fun countPath(grid: StringGrid, start: Pair<Int, Int>): Int {
     var currentDirection = findStartDirection(grid, start)
     var currentPosition = start.moveOne(currentDirection)
     var steps = 1
@@ -136,7 +134,7 @@ private fun findStartSymbol(`in`: Direction, out: Direction): Char {
     }
 }
 
-private fun paintPath(grid: Grid, start: Pair<Int, Int>): Grid {
+private fun paintPath(grid: StringGrid, start: Pair<Int, Int>): StringGrid {
     val gridCopy = MutableList(grid.size) { ".".repeat(grid[0].length) }
 
     val firstDirection = findStartDirection(grid, start)
@@ -156,7 +154,7 @@ private fun paintPath(grid: Grid, start: Pair<Int, Int>): Grid {
     return gridCopy
 }
 
-private fun Grid.zoomByThree(): Grid {
+private fun StringGrid.zoomByThree(): StringGrid {
     return this.flatMap { row ->
         val rowAbove = row
             .replace('|', 'X')
@@ -186,7 +184,7 @@ private fun Grid.zoomByThree(): Grid {
     }
 }
 
-private fun Grid.shrinkByThree(): Grid {
+private fun StringGrid.shrinkByThree(): StringGrid {
     return this
         .chunked(3)
         .map { it[1] }
@@ -200,7 +198,7 @@ private fun Grid.shrinkByThree(): Grid {
         }
 }
 
-private fun dilute(grid: Grid): Grid {
+private fun dilute(grid: StringGrid): StringGrid {
     return grid.mapIndexed { rowIndex, row ->
         row
             .replace("O,", "OO")

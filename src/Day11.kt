@@ -1,15 +1,19 @@
 import kotlin.math.abs
+import kotlin.math.max
+import kotlin.math.min
 
 private const val DAY = "11"
-private const val SOLUTION_TEST_1 = 374
-private const val SOLUTION_TEST_2 = 0
-
-private typealias CharGrid = List<List<Char>>
+private const val SOLUTION_TEST_1 = 374L
+private const val SOLUTION_TEST_2 = 8410L
 
 private fun CharGrid.doubleEmptyRows(): CharGrid {
     return this.flatMap { row ->
         if (row.none { it != '.' }) listOf(row, row) else listOf(row)
     }
+}
+
+private fun CharGrid.findEmptyRowIndices(): List<Int> {
+    return this.mapIndexedNotNull { index, row -> if (row.none { it != '.' }) index else null }
 }
 
 private fun CharGrid.expandEmptySpace(): CharGrid {
@@ -31,33 +35,65 @@ private fun CharGrid.getAllGalaxyLocations(): List<Pair<Int, Int>> {
     return galaxies
 }
 
-private fun List<Pair<Int, Int>>.computeSumOfShortestPaths(): Int {
+private fun shortestPath(a: Pair<Int, Int>, b: Pair<Int, Int>): Int {
+    return abs(a.first - b.first) + abs(a.second - b.second)
+}
+
+private fun List<Pair<Int, Int>>.computeSumOfShortestPaths(
+    emptyRows: List<Int>,
+    emptyCols: List<Int>,
+    multiplier: Int
+): Long {
     return this.sumOf { g1 ->
         this.sumOf { g2 ->
-            abs(g2.first - g1.first) + abs(g2.second - g1.second)
+            var shortestPath = shortestPath(g1, g2).toLong()
+
+            val numberOfEmptyRowsBetween = emptyRows.count {
+                it in min(g1.first, g2.first)..max(g1.first, g2.first)
+            }
+
+            val numberOfEmptyColsBetween = emptyCols.count {
+                it in min(g1.second, g2.second)..max(g1.second, g2.second)
+            }
+
+            val emptySpace = numberOfEmptyRowsBetween + numberOfEmptyColsBetween
+
+            shortestPath = shortestPath - emptySpace + emptySpace * multiplier
+
+            shortestPath
         }
     } / 2 // Counted each distance twice
 }
 
-private fun part1(input: List<String>): Int {
+private fun part1(input: List<String>): Long {
     val grid: CharGrid = input.map { it.toList() }
+    val emptySpaceMultiplier = 2
+
+    val emptyRowIndices = grid.findEmptyRowIndices()
+    val emptyColIndices = grid.transpose().findEmptyRowIndices()
 
     return grid
-        .expandEmptySpace()
         .getAllGalaxyLocations()
-        .computeSumOfShortestPaths()
+        .computeSumOfShortestPaths(emptyRowIndices, emptyColIndices, emptySpaceMultiplier)
 }
 
-private fun part2(input: List<String>): Int {
-    return 0
+private fun part2(input: List<String>, emptySpaceMultiplier: Int): Long {
+    val grid: CharGrid = input.map { it.toList() }
+
+    val emptyRowIndices = grid.findEmptyRowIndices()
+    val emptyColIndices = grid.transpose().findEmptyRowIndices()
+
+    return grid
+        .getAllGalaxyLocations()
+        .computeSumOfShortestPaths(emptyRowIndices, emptyColIndices, emptySpaceMultiplier)
 }
 
 fun main() {
     testPart1()
     runPart1()
 
-//    testPart2()
-//    runPart2()
+    testPart2()
+    runPart2()
 }
 
 /**
@@ -66,7 +102,7 @@ fun main() {
 
 private fun runPart1() = println(part1(mainInput))
 
-private fun runPart2() = println(part2(mainInput))
+private fun runPart2() = println(part2(mainInput, 1000000))
 
 private fun testPart1() {
     val result = part1(testInput1)
@@ -75,7 +111,7 @@ private fun testPart1() {
 }
 
 private fun testPart2() {
-    val result = part2(testInput2)
+    val result = part2(testInput2, 100)
     check(result == SOLUTION_TEST_2) { "Failed test 2 -> Is: $result, should be: $SOLUTION_TEST_2" }
     println("Test 2 successful!")
 }
