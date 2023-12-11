@@ -58,3 +58,10 @@ fun List<Int>.calculateLCM(): Long {
     }
     return result
 }
+
+/**
+ * From: https://stackoverflow.com/a/76533918
+ */
+fun <T> List<List<T>>.transpose(): List<List<T>> {
+    return (this[0].indices).map { i -> (this.indices).map { j -> this[j][i] } }
+}
