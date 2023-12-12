@@ -2,66 +2,94 @@ private const val DAY = "12"
 private const val SOLUTION_TEST_1 = 21
 private const val SOLUTION_TEST_2 = 525152L
 
+private val cache = mutableMapOf<Pair<String, Int>, Long>()
+
 private fun parse(line: String): Pair<String, List<Int>> {
     val parts = line.split(" ")
     return Pair(parts[0], parts[1].extractAllUnsignedInts())
 }
 
 private fun fits(arrangement: String, pattern: String): Boolean {
-    check(arrangement.length == pattern.length) { "Unequal lengths: ${arrangement.length}, ${pattern.length}" }
-    val fits = arrangement.zip(pattern).all { (c1, c2) -> c1 == c2 || c2 == '?' }
-    return fits
+    if (arrangement.length != pattern.length) return false
+
+    return arrangement.zip(pattern).all { (c1, c2) -> c1 == c2 || c2 == '?' }
 }
 
-fun countArrangements(pattern: String, groups: List<Int>): Int {
-    val length = pattern.length
-    val minNecessaryLength = groups.sumOf { it + 1 } - 1 // 1 gap for each group past the first
+fun countArrangements(pattern: String, groups: List<Int>): Long {
 
-    if (minNecessaryLength > length) return 0
+    // Base cases
+    if (pattern.isEmpty()) {
+        return if (groups.isEmpty()) 1 else 0
+    }
 
-    val startPositions = 0..length - minNecessaryLength
-    val nextGroup = groups[0]
-    val remainingGroups = groups.drop(1)
+    if (groups.isEmpty()) {
+        return if (pattern.last() == '#') 0 else countArrangements(pattern.dropLast(1), groups)
+    }
 
-    var count = 0
-    for (start in startPositions) {
-        var arrangement = ".".repeat(start) + "#".repeat(nextGroup)
+    val minLengthRequired = groups.reduce { a, b -> a + b + 1 }
+    if (minLengthRequired > pattern.length) {
+        return 0
+    }
 
-        arrangement += if (remainingGroups.isNotEmpty()) {
-            "."
-        } else {
-            ".".repeat(pattern.length - arrangement.length)
-        }
+    // Recursive case with cache
+    return cache.getOrPut(Pair(pattern, groups.size)) {
+        when (pattern.last()) {
+            '.' -> countArrangements(pattern.dropLast(1), groups)
+            '#' -> {
+                var patternForLastGroup = "#".repeat(groups.last())
 
-        if (fits(arrangement, pattern.substring(0, arrangement.length))) {
-            if (remainingGroups.isNotEmpty()) {
-                count += countArrangements(pattern.substring(startIndex = arrangement.length), remainingGroups)
-            } else {
-                count++
+                if (groups.count() > 1) {
+                    patternForLastGroup = ".$patternForLastGroup" // Add the '.' separating the last group from the rest
+                }
+
+                val size = patternForLastGroup.length
+
+                if (fits(patternForLastGroup, pattern.takeLast(size))) {
+                    countArrangements(pattern.dropLast(size), groups.dropLast(1))
+                } else {
+                    0
+                }
+            }
+
+            else -> { // Symbol is '?'
+                (countArrangements(pattern.dropLast(1) + ".", groups)
+                        + countArrangements(pattern.dropLast(1) + "#", groups))
             }
         }
     }
-    return count
 }
 
 private fun part1(input: List<String>): Int {
     return input
         .map(::parse)
         .sumOf { (pattern, groups) ->
+            cache.clear()
             countArrangements(pattern, groups)
         }
+        .toInt()
 }
 
 private fun part2(input: List<String>): Long {
-    return 0
+    return input
+        .map(::parse)
+        .map { (pattern, groups) ->
+            Pair(
+                List(5) { pattern }.joinToString("?"),
+                List(5) { groups }.flatten(),
+            )
+        }
+        .sumOf { (pattern, groups) ->
+            cache.clear()
+            countArrangements(pattern, groups)
+        }
 }
 
 fun main() {
     testPart1()
     runPart1()
 
-//    testPart2()
-//    runPart2()
+    testPart2()
+    runPart2()
 }
 
 /**
