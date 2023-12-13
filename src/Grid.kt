@@ -9,3 +9,5 @@ fun <T> Grid<T>.transpose(): Grid<T> {
 }
 
 fun <T> Grid<T>.print() = map { it.joinToString("") }.forEach(::println)
+
+fun List<String>.toCharGrid(): CharGrid = map { it.toList() }

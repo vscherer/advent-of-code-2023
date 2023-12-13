@@ -2,44 +2,30 @@ import kotlin.math.min
 
 private const val DAY = "13"
 private const val SOLUTION_TEST_1 = 405
-private const val SOLUTION_TEST_2 = 0
+private const val SOLUTION_TEST_2 = 400
 
-private fun findHorizontalMirrorLine(grid: CharGrid): Int? {
-//    grid.print()
-//    println()
-
+private fun findHorizontalMirrorLine(grid: CharGrid, numberOfSmudges: Int): Int? {
     for (index in 0..grid.size - 2) {
         val before = grid.take(index + 1)
         val after = grid.takeLast(grid.size - (index + 1))
+
         val length = min(before.size, after.size)
+        val beforeCut = before.takeLast(length).flatten()
+        val afterCut = after.take(length).reversed().flatten()
 
-//        before.print()
-//        println("==========")
-//        after.print()
-
-        val zip = before.takeLast(length).zip(after.take(length).reversed())
-        if (
-            zip.all { (r1, r2) ->
-//                println("Comparing: $r1 with $r2")
-                r1.asString() == r2.asString()
-            }
-        ) {
-//            println("Found row $index")
-            return index
-        }
-
-//        println()
+        val differences = beforeCut.zip(afterCut).count { (c1, c2) -> c1 != c2 }
+        if (differences == numberOfSmudges) return index
     }
 
     return null
 }
 
-private fun findMirrorLine(grid: CharGrid): Pair<Int, Int> {
-    findHorizontalMirrorLine(grid)?.let {
+private fun findMirrorLine(grid: CharGrid, numberOfSmudges: Int): Pair<Int, Int> {
+    findHorizontalMirrorLine(grid, numberOfSmudges)?.let {
         return Pair(it + 1, 0)
     }
 
-    findHorizontalMirrorLine(grid.transpose())?.let {
+    findHorizontalMirrorLine(grid.transpose(), numberOfSmudges)?.let {
         return Pair(0, it + 1)
     }
 
@@ -49,24 +35,29 @@ private fun findMirrorLine(grid: CharGrid): Pair<Int, Int> {
 private fun part1(input: List<String>): Int {
     return input
         .splitOnEmptyLine()
-        .map { it.map { line -> line.toList() } }
-        .map(::findMirrorLine)
+        .map { it.toCharGrid() }
+        .map { findMirrorLine(it, 0) }
         .sumOf { (row, col) ->
-//            println("Found $row, $col")
             if (row != 0) row * 100 else col
         }
 }
 
 private fun part2(input: List<String>): Int {
-    return 0
+    return input
+        .splitOnEmptyLine()
+        .map { it.toCharGrid() }
+        .map { findMirrorLine(it, 1) }
+        .sumOf { (row, col) ->
+            if (row != 0) row * 100 else col
+        }
 }
 
 fun main() {
     testPart1()
     runPart1()
 
-//    testPart2()
-//    runPart2()
+    testPart2()
+    runPart2()
 }
 
 /**
