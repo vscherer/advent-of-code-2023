@@ -58,3 +58,22 @@ fun List<Int>.calculateLCM(): Long {
     }
     return result
 }
+
+fun List<String>.splitOnEmptyLine(): List<List<String>> {
+    val result = mutableListOf<List<String>>()
+    var subList = mutableListOf<String>()
+
+    forEach { line ->
+        if (line.isBlank()) {
+            result.add(subList)
+            subList = mutableListOf()
+        } else {
+            subList.add(line)
+        }
+    }
+
+    result.add(subList)
+    return result
+}
+
+fun List<Char>.asString() = joinToString("")
