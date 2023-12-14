@@ -18,9 +18,9 @@ private fun CharGrid.findEmptyRowIndices(): List<Int> {
 
 private fun CharGrid.expandEmptySpace(): CharGrid {
     return this.doubleEmptyRows()
-        .transpose()
+        .transposed()
         .doubleEmptyRows()
-        .transpose()
+        .transposed()
 }
 
 private fun CharGrid.getAllGalaxyLocations(): List<Pair<Int, Int>> {
@@ -70,7 +70,7 @@ private fun part1(input: List<String>): Long {
     val emptySpaceMultiplier = 2
 
     val emptyRowIndices = grid.findEmptyRowIndices()
-    val emptyColIndices = grid.transpose().findEmptyRowIndices()
+    val emptyColIndices = grid.transposed().findEmptyRowIndices()
 
     return grid
         .getAllGalaxyLocations()
@@ -81,7 +81,7 @@ private fun part2(input: List<String>, emptySpaceMultiplier: Int): Long {
     val grid: CharGrid = input.map { it.toList() }
 
     val emptyRowIndices = grid.findEmptyRowIndices()
-    val emptyColIndices = grid.transpose().findEmptyRowIndices()
+    val emptyColIndices = grid.transposed().findEmptyRowIndices()
 
     return grid
         .getAllGalaxyLocations()

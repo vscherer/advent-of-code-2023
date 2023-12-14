@@ -25,7 +25,7 @@ private fun findMirrorLine(grid: CharGrid, numberOfSmudges: Int): Pair<Int, Int>
         return Pair(it + 1, 0)
     }
 
-    findHorizontalMirrorLine(grid.transpose(), numberOfSmudges)?.let {
+    findHorizontalMirrorLine(grid.transposed(), numberOfSmudges)?.let {
         return Pair(0, it + 1)
     }
 

@@ -77,3 +77,8 @@ fun List<String>.splitOnEmptyLine(): List<List<String>> {
 }
 
 fun List<Char>.asString() = joinToString("")
+
+// Elegant solution from https://stackoverflow.com/a/69937113
+fun <T> MutableList<T>.swap(index1: Int, index2: Int) {
+    this[index1] = this[index2].also { this[index2] = this[index1] }
+}
