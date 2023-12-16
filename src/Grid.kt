@@ -3,6 +3,26 @@ typealias MutableGrid<T> = MutableList<MutableList<T>>
 typealias CharGrid = Grid<Char>
 typealias MutableCharGrid = MutableGrid<Char>
 
+val <T> Grid<T>.numberOfRows
+    get() = this.size
+
+val <T> Grid<T>.numberOfColumns
+    get() = this[0].size
+
+// Constructors
+fun <T> createGrid(rows: Int, columns: Int, initialValue: T): Grid<T> = List(rows) { List(columns) { initialValue } }
+
+fun <T> createGrid(rows: Int, columns: Int, initialValueGenerator: () -> T): Grid<T> =
+    List(rows) { List(columns) { initialValueGenerator() } }
+
+// Access
+
+fun <T> Grid<T>.get(coordinates: Pair<Int, Int>) = this[coordinates.first][coordinates.second]
+
+fun <T> MutableGrid<T>.set(coordinates: Pair<Int, Int>, value: T) {
+    this[coordinates.first][coordinates.second] = value
+}
+
 // Basics
 fun <T> Grid<T>.print() = map { it.joinToString("") }.forEach(::println)
 
