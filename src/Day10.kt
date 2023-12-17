@@ -1,4 +1,4 @@
-import Direction.*
+import GridDirection.*
 
 private const val DAY = "10"
 private const val SOLUTION_TEST_1 = 8
@@ -7,14 +7,7 @@ private const val SOLUTION_TEST_2 = 10
 private typealias StringGrid = List<String>
 private typealias MutableStringGrid = MutableList<String>
 
-private enum class Direction {
-    NORTH,
-    EAST,
-    SOUTH,
-    WEST,
-}
-
-private fun Pair<Int, Int>.moveOne(dir: Direction): Pair<Int, Int> {
+private fun Pair<Int, Int>.moveOne(dir: GridDirection): Pair<Int, Int> {
     return when (dir) {
         NORTH -> Pair(first - 1, second)
         EAST -> Pair(first, second + 1)
@@ -55,7 +48,7 @@ private fun findStart(grid: StringGrid): Pair<Int, Int> {
     throw IllegalStateException("No Start in input")
 }
 
-private fun findStartDirection(grid: StringGrid, start: Pair<Int, Int>): Direction {
+private fun findStartDirection(grid: StringGrid, start: Pair<Int, Int>): GridDirection {
     return when {
         listOf('|', '7', 'F').contains(grid.get(start.moveOne(NORTH))) -> NORTH
         listOf('|', 'J', 'L').contains(grid.get(start.moveOne(SOUTH))) -> SOUTH
@@ -67,7 +60,7 @@ private fun findStartDirection(grid: StringGrid, start: Pair<Int, Int>): Directi
 /**
  * Assumes previous connection is valid
  */
-private fun findNextDirection(symbol: Char, direction: Direction): Direction {
+private fun findNextDirection(symbol: Char, direction: GridDirection): GridDirection {
     return when (symbol) {
         '|' -> direction
         '-' -> direction
@@ -94,7 +87,7 @@ private fun countPath(grid: StringGrid, start: Pair<Int, Int>): Int {
 }
 
 
-private fun findStartSymbol(`in`: Direction, out: Direction): Char {
+private fun findStartSymbol(`in`: GridDirection, out: GridDirection): Char {
     return when (`in`) {
         NORTH -> {
             when (out) {

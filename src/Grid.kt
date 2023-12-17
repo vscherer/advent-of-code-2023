@@ -3,11 +3,44 @@ typealias MutableGrid<T> = MutableList<MutableList<T>>
 typealias CharGrid = Grid<Char>
 typealias MutableCharGrid = MutableGrid<Char>
 
+enum class GridDirection {
+    NORTH,
+    EAST,
+    SOUTH,
+    WEST;
+
+    val opposite
+        get() = when (this) {
+            NORTH -> SOUTH
+            EAST -> WEST
+            SOUTH -> NORTH
+            WEST -> EAST
+        }
+
+    fun getStep(): Pair<Int, Int> {
+        return when (this) {
+            NORTH -> Pair(-1, 0)
+            EAST -> Pair(0, 1)
+            SOUTH -> Pair(1, 0)
+            WEST -> Pair(0, -1)
+        }
+    }
+
+
+}
+
+// Dimensions
+val <T> Grid<T>.dimension
+    get() = Pair(this.numberOfRows, this.numberOfColumns)
+
 val <T> Grid<T>.numberOfRows
     get() = this.size
 
 val <T> Grid<T>.numberOfColumns
     get() = this[0].size
+
+fun <T> Grid<T>.contains(location: Pair<Int, Int>) =
+    location.first in 0..<numberOfRows && location.second in 0..<numberOfColumns
 
 // Constructors
 fun <T> createGrid(rows: Int, columns: Int, initialValue: T): Grid<T> = List(rows) { List(columns) { initialValue } }
