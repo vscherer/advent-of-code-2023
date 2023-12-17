@@ -1,3 +1,4 @@
+import utils.*
 import kotlin.math.min
 
 private const val DAY = "17"
@@ -68,7 +69,7 @@ private fun customDijkstra(): Int {
     while (queue.isNotEmpty()) {
         val nextEntry = queue.poll()
         done[nextEntry.first] = true
-        
+
         if (nextEntry.first.location == end) {
             shortestPaths.add(nextEntry.second)
         } else {

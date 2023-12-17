@@ -1,4 +1,6 @@
-import GridDirection.*
+import utils.GridDirection
+import utils.GridDirection.*
+import utils.readInput
 
 private const val DAY = "10"
 private const val SOLUTION_TEST_1 = 8

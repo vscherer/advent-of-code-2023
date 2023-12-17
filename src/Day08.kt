@@ -1,3 +1,7 @@
+import utils.calculateLCM
+import utils.extractAll
+import utils.readInput
+
 private const val DAY = "08"
 private const val SOLUTION_TEST_1 = 2
 private const val SOLUTION_TEST_1b = 6

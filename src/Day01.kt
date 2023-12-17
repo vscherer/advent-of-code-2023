@@ -1,3 +1,6 @@
+import utils.println
+import utils.readInput
+
 fun main() {
 
     // Only replace first char to allow overlap
@@ -15,10 +18,10 @@ fun main() {
 
     fun String.filterDigits() = filter { it.isDigit() }
 
-    fun String.replaceSpelledOutDigits() : String {
-        return this.fold ("") { processed, nextChar ->
+    fun String.replaceSpelledOutDigits(): String {
+        return this.fold("") { processed, nextChar ->
             var result = "$processed$nextChar"
-            for ( (pattern, replacement) in spelledOutReplacements) {
+            for ((pattern, replacement) in spelledOutReplacements) {
                 if (pattern in result) {
                     result = result.replace(pattern, replacement)
                 }
@@ -37,7 +40,7 @@ fun main() {
     }
 
     fun part2(input: List<String>): Int {
-        return input.sumOf { s -> extractCalibrationValue(s.replaceSpelledOutDigits())}
+        return input.sumOf { s -> extractCalibrationValue(s.replaceSpelledOutDigits()) }
     }
 
     val testInput1 = readInput("Day01_test")

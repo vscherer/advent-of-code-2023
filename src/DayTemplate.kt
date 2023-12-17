@@ -1,3 +1,5 @@
+import utils.readInput
+
 private const val DAY = "00"
 private const val SOLUTION_TEST_1 = 0
 private const val SOLUTION_TEST_2 = 0

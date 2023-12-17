@@ -1,3 +1,5 @@
+import utils.*
+
 private const val DAY = "14"
 private const val SOLUTION_TEST_1 = 136
 private const val SOLUTION_TEST_2 = 64

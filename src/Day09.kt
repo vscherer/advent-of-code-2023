@@ -1,3 +1,6 @@
+import utils.extractAllSignedLongs
+import utils.readInput
+
 private const val DAY = "09"
 private const val SOLUTION_TEST_1 = 114L
 private const val SOLUTION_TEST_2 = 2L

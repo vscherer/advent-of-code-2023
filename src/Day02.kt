@@ -1,3 +1,8 @@
+import utils.extractAll
+import utils.extractFirst
+import utils.println
+import utils.readInput
+
 fun main() {
 
     fun String.extractGameNumber(): Int {

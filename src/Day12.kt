@@ -1,3 +1,6 @@
+import utils.extractAllUnsignedInts
+import utils.readInput
+
 private const val DAY = "12"
 private const val SOLUTION_TEST_1 = 21
 private const val SOLUTION_TEST_2 = 525152L

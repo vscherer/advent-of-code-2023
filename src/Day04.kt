@@ -1,3 +1,5 @@
+import utils.extractAllUnsignedInts
+import utils.readInput
 import kotlin.math.pow
 
 private const val DAY = "04"
