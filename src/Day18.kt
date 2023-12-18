@@ -7,9 +7,9 @@ import kotlin.math.min
 
 private const val DAY = "18"
 private const val SOLUTION_TEST_1 = 62
-private const val SOLUTION_TEST_2 = 0
+private const val SOLUTION_TEST_2 = 952408144115L
 
-private data class DigInstruction(val direction: GridDirection, val distance: Int /*, val color: Color*/)
+private data class DigInstruction(val direction: GridDirection, val distance: Int)
 
 private fun String.toDirection(): GridDirection {
     return when (this[0]) {
@@ -24,8 +24,24 @@ private fun parseInput(input: List<String>): List<DigInstruction> {
     return input
         .map { it.split(" ") }
         .map {
-            DigInstruction(it[0].toDirection(), it[1].toInt() /*, it[2].toColor()*/)
+            DigInstruction(it[0].toDirection(), it[1].toInt())
         }
+}
+
+private fun Char.toDirection2(): GridDirection {
+    return when (this) {
+        '3' -> GridDirection.NORTH
+        '1' -> GridDirection.SOUTH
+        '0' -> GridDirection.EAST
+        else -> GridDirection.WEST
+    }
+}
+
+private fun parseInput2(input: List<String>): List<DigInstruction> {
+    return input
+        .map { it.split(" ").last() }
+        .map { it.drop(1).dropLast(1) } // drop ( )
+        .map { DigInstruction(it.last().toDirection2(), Integer.valueOf(it.substring(1, 6), 16)) }
 }
 
 private fun List<DigInstruction>.getCorners(): List<Pair<Int, Int>> {
@@ -73,30 +89,39 @@ private fun IntRange.areaInsideInclusive() = last - first + 1
 
 private fun IntRange.containsInclusive(x: Int) = x in first..last + 1
 
-private fun calculateArea(corners: List<Pair<Int, Int>>): Int {
+/**
+ * Too late in the evening to clean this up, so here's the gist:
+ * Perform scanline algorithm across the entire lagoon.
+ *
+ * To calculate the area, we keep track of the ranges currently on our scanline and update that
+ * whenever we hit an interesting row (any row that contains at least one corner):
+ * - Update the ranges
+ * - Increase the total area by the area on this row
+ * - Increase the total area by the area of the next row, times the distance to the next corner/row
+ */
+private fun calculateArea(corners: List<Pair<Int, Int>>): Long {
     var sortedCorners = corners
         .pushedToPositive()
         .sortedWith(compareBy({ it.first }, { it.second }))
 
-    var totalArea = 0
+    println("Corners:")
+    sortedCorners.forEach(::println)
+
+    var totalArea = 0L
     val currentRangesInside = mutableListOf<IntRange>()
     while (sortedCorners.isNotEmpty()) {
         val row = sortedCorners.first().first
         println("On row: $row")
-        println("Current ranges: $currentRangesInside")
-        var areaOfThisLine = currentRangesInside.sumOf { it.areaInsideInclusive() }
+        var areaOfThisLine = currentRangesInside.sumOf { it.areaInsideInclusive() }.toLong()
 
         val rangesOnThisRow = sortedCorners.filter { it.first == row }
             .chunked(2)
             .map { (start, end) -> start.second..end.second }
 
-        println("Ranges on here: $rangesOnThisRow")
 
         rangesOnThisRow.forEach { range ->
-            println("Checking $range against $currentRangesInside")
-            val matchingRanges =
-                currentRangesInside.filter { it.containsInclusive(range.first) || it.containsInclusive(range.last) }
-            println("Range $range matches $matchingRanges")
+            val matchingRanges = currentRangesInside
+                .filter { it.containsInclusive(range.first) || it.containsInclusive(range.last) }
 
             when (matchingRanges.size) {
                 0 -> {
@@ -112,9 +137,7 @@ private fun calculateArea(corners: List<Pair<Int, Int>>): Int {
 
                     if (rangesToAdd.size == 1) {
                         val newRange = rangesToAdd.single()
-                        if (hitRange.containsInclusive(newRange.first) && hitRange.containsInclusive(newRange.last)) {
-                            println("smaller by ${range.areaInside() + 1}")
-                        } else {
+                        if (!(hitRange.containsInclusive(newRange.first) && hitRange.containsInclusive(newRange.last))) {
                             areaOfThisLine += range.areaInside() + 1
                         }
                     }
@@ -133,36 +156,35 @@ private fun calculateArea(corners: List<Pair<Int, Int>>): Int {
 
         sortedCorners = sortedCorners.drop(rangesOnThisRow.size * 2)
         totalArea += areaOfThisLine
-        println("Area of this line: $areaOfThisLine")
-
 
         if (sortedCorners.isNotEmpty()) {
-            println("Area after this line ${currentRangesInside.sumOf { it.areaInsideInclusive() }} for ${(sortedCorners.first().first - row - 1)} lines is ${currentRangesInside.sumOf { it.areaInsideInclusive() } * (sortedCorners.first().first - row - 1)}")
-            totalArea += currentRangesInside.sumOf { it.areaInsideInclusive() } * (sortedCorners.first().first - row - 1)
+            val areaOnLineAfterThisLine = currentRangesInside
+                .sumOf { it.areaInsideInclusive().toLong() }
 
+            totalArea += areaOnLineAfterThisLine * (sortedCorners.first().first - row - 1)
         }
-        println("Area now: $totalArea")
-
     }
+
     return totalArea
 }
 
 private fun part1(input: List<String>): Int {
     val corners = parseInput(input).getCorners()
-//    println("$corners")
-    return calculateArea(corners)
+    return calculateArea(corners).toInt()
 }
 
-private fun part2(input: List<String>): Int {
-    return 0
+private fun part2(input: List<String>): Long {
+    val corners = parseInput2(input).getCorners()
+
+    return calculateArea(corners)
 }
 
 fun main() {
     testPart1()
     runPart1()
 
-//    testPart2()
-//    runPart2()
+    testPart2()
+    runPart2()
 }
 
 /**
