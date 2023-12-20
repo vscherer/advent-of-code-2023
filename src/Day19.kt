@@ -1,23 +1,53 @@
 import utils.*
+import kotlin.math.max
+import kotlin.math.min
 
 private const val DAY = "19"
 private const val SOLUTION_TEST_1 = 19114
 private const val SOLUTION_TEST_2 = 167409079868000L
 
-private data class Criterion(val attribute: Char, val isLowerBound: Boolean, val limit: Int, val target: String)
+private enum class Attribute { X, M, A, S }
+
+private data class Criterion(val attribute: Attribute, val acceptedRange: IntRange, val target: String)
 private data class WorkFlow(val label: String, val criteria: List<Criterion>, val default: String)
-private data class Part(val x: Int, val m: Int, val a: Int, val s: Int)
+private typealias Part = Map<Attribute, Int>
+private typealias PartRange = Map<Attribute, IntRange>
+
+private fun Char.toAttribute(): Attribute {
+    return when (this) {
+        'x' -> Attribute.X
+        'm' -> Attribute.M
+        'a' -> Attribute.A
+        else -> Attribute.S
+    }
+}
 
 private val Part.sumOfRatings
-    get() = x + m + a + s
+    get() = values.sum()
 
-private fun String.toCriterion(): Criterion {
-    return Criterion(
-        attribute = this.first(),
-        isLowerBound = this.contains(">"),
-        limit = this.extractAllUnsignedInts().first(),
-        target = this.substring(this.indexOf(':') + 1)
-    )
+private val PartRange.productOfRatingRanges
+    get() = values.map { it.total() }.reduce(Long::times)
+
+private fun IntRange.total(): Long {
+    return if (first > 0) last.toLong() - first + 1 else last.toLong()
+}
+
+private fun IntRange.unionWith(other: IntRange): IntRange? {
+    val newRange = max(this.first, other.first)..min(this.last, other.last)
+    return if (newRange.first <= newRange.last) newRange else null
+}
+
+private fun IntRange.minus(other: IntRange): List<IntRange> {
+    val leftOver = mutableListOf<IntRange>()
+    if (first < other.first) {
+        leftOver.add(first()..<other.first())
+    }
+
+    if (last > other.last) {
+        leftOver.add(other.last + 1..last)
+    }
+
+    return leftOver
 }
 
 private fun parseWorkflows(input: List<String>): Map<String, WorkFlow> {
@@ -30,27 +60,32 @@ private fun parseWorkflows(input: List<String>): Map<String, WorkFlow> {
     }
 }
 
+private fun String.toCriterion(): Criterion {
+    val limit = this.extractAllUnsignedInts().first()
+    val range = if (this.contains(">")) {
+        limit + 1..4000
+    } else {
+        0..<limit
+    }
+
+    return Criterion(
+        attribute = this.first().toAttribute(),
+        acceptedRange = range,
+        target = this.substring(this.indexOf(':') + 1)
+    )
+}
+
 private fun parseParts(input: List<String>): List<Part> {
     return input.map { line ->
-        line.extractAllUnsignedInts()
-            .let { Part(it[0], it[1], it[2], it[3]) }
+        Attribute.entries
+            .zip(line.extractAllUnsignedInts())
+            .toMap()
     }
 }
 
 private fun Criterion.process(part: Part): String? {
-    val partValue = when (attribute) {
-        'x' -> part.x
-        'm' -> part.m
-        'a' -> part.a
-        's' -> part.s
-        else -> throw IllegalStateException("Wrong criterion: $this")
-    }
-
-    val match = if (isLowerBound) {
-        partValue > limit
-    } else {
-        partValue < limit
-    }
+    val partValue = part[attribute]!!
+    val match = acceptedRange.contains(partValue)
 
     return if (match) target else null
 }
@@ -75,6 +110,71 @@ private fun checkForAcceptance(part: Part, workFlows: Map<String, WorkFlow>): Bo
     }
 }
 
+private fun PartRange.splitOn(criterion: Criterion): Pair<PartRange?, PartRange?> {
+    val attribute = criterion.attribute
+    val currentRange = this[attribute]!!
+
+    val accepted = currentRange.unionWith(criterion.acceptedRange)
+    val rejected = currentRange.minus(criterion.acceptedRange).singleOrNull()
+
+    val acceptedPartRange = if (accepted != null) {
+        this.toMutableMap()
+            .apply { set(attribute, accepted) }
+            .toMap()
+    } else {
+        null
+    }
+
+    val rejectedPartRange = if (rejected != null) {
+        this.toMutableMap()
+            .apply { set(attribute, rejected) }
+            .toMap()
+    } else {
+        null
+    }
+
+    return Pair(acceptedPartRange, rejectedPartRange)
+}
+
+private fun PartRange.processWith(workFlow: WorkFlow): List<Pair<PartRange, String>> {
+    val processedRanges = mutableListOf<Pair<PartRange, String>>()
+    val leftOver = workFlow.criteria.fold<Criterion, PartRange?>(this) { range, criterion ->
+        if (range != null) {
+            val (accepted, rejected) = range.splitOn(criterion)
+            if (accepted != null) {
+                processedRanges.add(accepted to criterion.target)
+            }
+            rejected
+        } else {
+            null
+        }
+    }
+    if (leftOver != null) processedRanges.add(leftOver to workFlow.default)
+
+    return processedRanges
+}
+
+private fun findAllPossibleRanges(workFlows: Map<String, WorkFlow>): List<PartRange> {
+    val fullRange: PartRange = Attribute.entries.associateWith { 0..4000 }
+
+    val queue = ArrayDeque<Pair<PartRange, String>>()
+    queue.add(Pair(fullRange, "in"))
+
+    val acceptedRanges = mutableListOf<PartRange>()
+    while (queue.isNotEmpty()) {
+        val (nextPartRange, target) = queue.removeFirst()
+        when (target) {
+            "A" -> acceptedRanges.add(nextPartRange)
+            "R" -> {} // rejected, nothing more to do
+            else -> queue.addAll(
+                nextPartRange.processWith(workFlows[target]!!)
+            )
+        }
+    }
+
+    return acceptedRanges
+}
+
 private fun part1(input: List<String>): Int {
     val inputs = input.splitOnEmptyLine()
     val workFlows = parseWorkflows(inputs[0])
@@ -86,15 +186,17 @@ private fun part1(input: List<String>): Int {
 }
 
 private fun part2(input: List<String>): Long {
-    return 0
+    val inputs = input.splitOnEmptyLine()
+    val workFlows = parseWorkflows(inputs[0])
+    return findAllPossibleRanges(workFlows).sumOf { it.productOfRatingRanges }
 }
 
 fun main() {
     testPart1()
     runPart1()
 
-//    testPart2()
-//    runPart2()
+    testPart2()
+    runPart2()
 }
 
 /**
