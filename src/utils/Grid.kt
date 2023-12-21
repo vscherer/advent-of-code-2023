@@ -39,6 +39,11 @@ fun <T> MutableGrid<T>.set(coordinates: Pair<Int, Int>, value: T) {
     this[coordinates.first][coordinates.second] = value
 }
 
+fun <T> Grid<T>.count(predicate: (T) -> Boolean) = sumOf { row -> row.count(predicate) }
+
+fun <T, R> Grid<T>.fold(initial: R, operation: (R, T) -> R) =
+    fold(initial) { acc, row: List<T> -> row.fold(acc, operation) }
+
 
 // Casting
 
