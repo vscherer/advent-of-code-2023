@@ -68,6 +68,12 @@ fun <T> MutableGrid<T>.transpose() {
     this.addAll(transposed)
 }
 
+fun <T> Grid<T>.repeat(vertical: Int, horizontal: Int): Grid<T> {
+    val wider = this.map { row ->
+        List(horizontal) { row }.flatten()
+    }
+    return List(vertical) { wider }.flatten()
+}
 
 // Misc
 
