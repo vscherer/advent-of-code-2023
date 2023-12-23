@@ -5,12 +5,12 @@ import kotlin.math.max
 
 private const val DAY = "23"
 private const val SOLUTION_TEST_1 = 94
-private const val SOLUTION_TEST_2 = 0
+private const val SOLUTION_TEST_2 = 154
 
 private typealias Location = Pair<Int, Int>
 private typealias Graph = MutableMap<Location, MutableList<Path>>
 
-private data class Path(val to: Location, val length: Int)
+private data class Path(val from: Location, val to: Location, val length: Int)
 
 private fun Graph.add(from: Location, path: Path) {
     if (this.contains(from)) {
@@ -28,10 +28,8 @@ private fun followPath(grid: CharGrid, start: Location, direction: GridDirection
 
     while (true) {
         if (currentLocation == end) {
-            return Path(end, length)
+            return Path(start, end, length)
         }
-
-//        println("at $currentLocation, looking $currentDirection, at ${grid.get(currentLocation + currentDirection.getStep())}, length: $length")
 
         when (grid.get(currentLocation + currentDirection.getStep())) {
             '#' -> {
@@ -48,14 +46,12 @@ private fun followPath(grid: CharGrid, start: Location, direction: GridDirection
 
             'v' -> {
                 val target = currentLocation + currentDirection.getStep() + SOUTH.getStep()
-//                println("Found path from $start: ${Path(target, length + 2)}")
-                return Path(target, length + 2)
+                return Path(start, target, length + 2)
             }
 
             '>' -> {
                 val target = currentLocation + currentDirection.getStep() + EAST.getStep()
-//                println("Found path from $start: ${Path(target, length + 2)}")
-                return Path(target, length + 2)
+                return Path(start, target, length + 2)
             }
 
             else -> { // '.'
@@ -66,8 +62,19 @@ private fun followPath(grid: CharGrid, start: Location, direction: GridDirection
     }
 }
 
+private fun findAllPathsFrom(node: Location, grid: CharGrid): List<Path> {
+    return buildList {
+        if (grid.get(node + SOUTH.getStep()) == 'v') {
+            add(followPath(grid, node, SOUTH))
+        }
+        if (grid.get(node + EAST.getStep()) == '>') {
+            add(followPath(grid, node, EAST))
+        }
+        // No ^ or < in my input
+    }
+}
+
 private fun parseGraph(grid: CharGrid): Pair<Graph, Path> {
-    println("Grid: ${grid.dimensions}")
     val graph = mutableMapOf<Location, MutableList<Path>>()
 
     val start = Pair(-1, 1)
@@ -82,22 +89,14 @@ private fun parseGraph(grid: CharGrid): Pair<Graph, Path> {
 
         if (graph.contains(node)) continue // Already visited
 
-        val paths = buildList {
-            if (grid.get(node + SOUTH.getStep()) == 'v') {
-                add(followPath(grid, node, SOUTH))
-            }
-            if (grid.get(node + EAST.getStep()) == '>') {
-                add(followPath(grid, node, EAST))
-            }
-            // No ^ or < in my input
-        }
+        findAllPathsFrom(node, grid)
+            .forEach { path ->
+                graph.add(node, path)
 
-        paths.forEach { path ->
-            graph.add(node, path)
-            if (path.to != end) {
-                queue.add(path.to)
+                if (path.to != end) {
+                    queue.add(path.to)
+                }
             }
-        }
     }
 
     return Pair(graph, startPath)
@@ -114,7 +113,6 @@ private fun topologicalSort(graph: Graph, start: Location): List<Location> {
     }
 
     while (toSort.isNotEmpty()) {
-//        println("Sorting... $sorted")
         val sizeBefore = sorted.size
         val canAdd = toSort.filter { to: Location ->
             sorted.containsAll(inConnections[to] ?: emptyList())
@@ -130,6 +128,29 @@ private fun topologicalSort(graph: Graph, start: Location): List<Location> {
     return sorted.toList()
 }
 
+private fun Graph.addReverseEdges() {
+    this.values.flatten().forEach {
+        this.add(it.to, Path(it.to, it.from, it.length))
+    }
+}
+
+private fun dfs(graph: Graph, visited: MutableList<Location>, end: Location): Int {
+    if (visited.size == 4) print(".")
+    return graph[visited.last()]!!.maxOf { path: Path ->
+
+        if (path.to == end) {
+            path.length
+        } else if (visited.contains(path.to)) {
+            0
+        } else {
+            visited.add(path.to)
+            path.length + dfs(graph, visited, end).also {
+                visited.remove(path.to)
+            }
+        }
+    }
+}
+
 private fun part1(input: List<String>): Int {
     val grid = input.toCharGrid()
     val end = Pair(grid.numberOfRows - 1, grid.numberOfColumns - 2)
@@ -137,7 +158,6 @@ private fun part1(input: List<String>): Int {
     val (graph, startPath) = parseGraph(grid)
 
     val sortedNodes = topologicalSort(graph, startPath.to)
-    println(sortedNodes)
 
     val longestPathTo = mutableMapOf(startPath.to to startPath.length)
     sortedNodes.forEach { from ->
@@ -150,15 +170,26 @@ private fun part1(input: List<String>): Int {
 }
 
 private fun part2(input: List<String>): Int {
-    return 0
+    val grid = input.toCharGrid()
+    val end = Pair(grid.numberOfRows - 1, grid.numberOfColumns - 2)
+
+    val (graph, startPath) = parseGraph(grid)
+
+    graph.addReverseEdges()
+
+    print("Finding longest path by DFS.")
+    val visitedNodes = mutableListOf(startPath.to)
+    val longestPath = dfs(graph, visitedNodes, end) + startPath.length - 1
+    println()
+    return longestPath
 }
 
 fun main() {
     testPart1()
     runPart1()
 
-//    testPart2()
-//    runPart2()
+    testPart2()
+    runPart2()
 }
 
 /**
