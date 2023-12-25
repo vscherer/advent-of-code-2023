@@ -4,7 +4,7 @@ import kotlin.math.sign
 
 private const val DAY = "24"
 private const val SOLUTION_TEST_1 = 2
-private const val SOLUTION_TEST_2 = 47
+private const val SOLUTION_TEST_2 = 47L
 
 private typealias Vec3 = Triple<Double, Double, Double>
 private typealias Vec2 = Pair<Double, Double>
@@ -91,16 +91,55 @@ private fun part1(input: List<String>, area: ClosedFloatingPointRange<Double>): 
     return totalPotentialCollisions
 }
 
-private fun part2(input: List<String>): Int {
-    return 0
+/**
+ * For my input, there are three hailstones that share both their initial X coordinate
+ * and their speed along that axis. Therefore, the rock needs to share those two values
+ * as well.
+ *
+ * There are no such hailstones for the other dimensions.
+ */
+private fun findXAndU(hailStones: List<HailStone>): Pair<Double, Double> {
+    hailStones.forEachIndexed { index, a ->
+        hailStones.subList(index + 1, hailStones.size).forEach { b ->
+            if (a.x == b.x && a.u == b.u) {
+                println("X: ${a.x}, U: ${a.u}")
+                return Pair(a.x, a.u)
+            }
+        }
+    }
+    throw IllegalStateException("No stones sharing X/U found.")
+}
+
+private fun part2(input: List<String>): Long {
+    val hailStones = input.map(::parseHailStone)
+
+    val (rockX, rockU) = findXAndU(hailStones)
+
+    val stone0 = hailStones[0]
+    val timeOfCollisionWithStone0 = (rockX - stone0.x) / (stone0.u - rockU)
+    val collision0Y = stone0.y + timeOfCollisionWithStone0 * stone0.v
+    val collision0Z = stone0.z + timeOfCollisionWithStone0 * stone0.w
+
+    val stone1 = hailStones[1]
+    val timeOfCollisionWithStone1 = (rockX - stone1.x) / (stone1.u - rockU)
+    val collision1Y = stone1.y + timeOfCollisionWithStone1 * stone1.v
+    val collision1Z = stone1.z + timeOfCollisionWithStone1 * stone1.w
+
+    val rockV = (collision0Y - collision1Y) / (timeOfCollisionWithStone0 - timeOfCollisionWithStone1)
+    val rockW = (collision0Z - collision1Z) / (timeOfCollisionWithStone0 - timeOfCollisionWithStone1)
+
+    val rockY = collision0Y - timeOfCollisionWithStone0 * rockV
+    val rockZ = collision0Z - timeOfCollisionWithStone0 * rockW
+
+    return (rockX + rockY + rockZ).toLong()
 }
 
 fun main() {
     testPart1()
     runPart1()
 
-//    testPart2()
-//    runPart2()
+    // Method does not work for test input
+    runPart2()
 }
 
 /**
