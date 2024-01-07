@@ -4,6 +4,7 @@ import utils.transposed
 import kotlin.math.abs
 import kotlin.math.max
 import kotlin.math.min
+import kotlin.time.measureTime
 
 private const val DAY = "11"
 private const val SOLUTION_TEST_1 = 374L
@@ -92,11 +93,23 @@ private fun part2(input: List<String>, emptySpaceMultiplier: Int): Long {
 }
 
 fun main() {
-    testPart1()
-    runPart1()
+    println("Day $DAY")
 
+    println("Testing Part 1...")
+    testPart1()
+    println("Running Part 1...")
+    val part1Time = measureTime {
+        runPart1()
+    }
+    println("Part 1 time: $part1Time")
+
+    println("Testing Part 2...")
     testPart2()
-    runPart2()
+    println("Running Part 2...")
+    val part2Time = measureTime {
+        runPart2()
+    }
+    println("Part 2 time: $part2Time")
 }
 
 /**

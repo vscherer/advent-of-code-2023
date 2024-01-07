@@ -2,6 +2,7 @@ import utils.extractAll
 import utils.extractFirst
 import utils.println
 import utils.readInput
+import kotlin.time.measureTime
 
 fun main() {
 
@@ -55,8 +56,15 @@ fun main() {
     check(part2(testInput2) == 2286)
 
     val input = readInput("Day02")
-    part1(input).println()
-    part2(input).println()
+    val part1Time = measureTime {
+        part1(input).println()
+    }
+    println("Part 1 time: $part1Time")
+
+    val part2Time = measureTime {
+        part2(input).println()
+    }
+    println("Part 2 time: $part2Time")
 }
 
 data class CubeSample(val color: Char, val quantity: Int)

@@ -1,4 +1,5 @@
 import utils.readInput
+import kotlin.time.measureTime
 
 private const val DAY = "07"
 private const val SOLUTION_TEST_1 = 6440
@@ -95,11 +96,23 @@ private fun part2(input: List<String>): Int {
 }
 
 fun main() {
-    testPart1()
-    runPart1()
+    println("Day $DAY")
 
+    println("Testing Part 1...")
+    testPart1()
+    println("Running Part 1...")
+    val part1Time = measureTime {
+        runPart1()
+    }
+    println("Part 1 time: $part1Time")
+
+    println("Testing Part 2...")
     testPart2()
-    runPart2()
+    println("Running Part 2...")
+    val part2Time = measureTime {
+        runPart2()
+    }
+    println("Part 2 time: $part2Time")
 }
 
 /**
@@ -113,11 +126,13 @@ private fun runPart2() = println(part2(mainInput))
 private fun testPart1() {
     val result = part1(testInput1)
     check(result == SOLUTION_TEST_1) { "Failed test 1 -> Is: $result, should be: $SOLUTION_TEST_1" }
+    println("Test 1 successful!")
 }
 
 private fun testPart2() {
     val result = part2(testInput2)
     check(result == SOLUTION_TEST_2) { "Failed test 2 -> Is: $result, should be: $SOLUTION_TEST_2" }
+    println("Test 2 successful!")
 }
 
 private val mainInput: List<String>

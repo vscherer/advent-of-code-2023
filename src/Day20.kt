@@ -1,6 +1,7 @@
 import utils.calculateLCM
 import utils.extractAll
 import utils.readInput
+import kotlin.time.measureTime
 
 private const val DAY = "20"
 private const val SOLUTION_TEST_1 = 11687500L
@@ -123,7 +124,6 @@ private fun findCycles(interestingModules: List<String>, modules: Map<String, Mo
 
             if (interestingModules.contains(module) && pulse.isHigh) {
                 if (!interestingModuleCycles.contains(module)) {
-                    println("Received high pulse from $module after $numberOfButtonPresses presses")
                     interestingModuleCycles[module] = numberOfButtonPresses
                 }
             }
@@ -155,7 +155,6 @@ private fun part2(input: List<String>): Long {
 
     // We want to find out when mainConjunctionModule turns on, so we find the cycles for all of its inputs
     val interestingModules = modules.values.filter { it.outputs.contains(mainConjunctionModule.label) }.map { it.label }
-    println("Interesting modules: $interestingModules")
 
     val cycles = findCycles(interestingModules, modules)
 
@@ -164,11 +163,23 @@ private fun part2(input: List<String>): Long {
 }
 
 fun main() {
-    testPart1()
-    runPart1()
+    println("Day $DAY")
 
-    // no test 2
-    runPart2()
+    println("Testing Part 1...")
+    testPart1()
+    println("Running Part 1...")
+    val part1Time = measureTime {
+        runPart1()
+    }
+    println("Part 1 time: $part1Time")
+
+    println("Testing Part 2...")
+    println("No test 2 today.")
+    println("Running Part 2...")
+    val part2Time = measureTime {
+        runPart2()
+    }
+    println("Part 2 time: $part2Time")
 }
 
 /**

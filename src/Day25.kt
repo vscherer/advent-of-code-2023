@@ -1,5 +1,6 @@
 import utils.extractAll
 import utils.readInput
+import kotlin.time.measureTime
 
 private const val DAY = "25"
 private const val SOLUTION_TEST_1 = 54
@@ -26,7 +27,6 @@ private fun MutableList<KragerEdge>.removeEdge(e: KragerEdge) = removeAll {
 }
 
 private fun contract(nodes: Set<String>, edges: List<Edge>): Triple<Int, Int, Int> { // Returns: mincut, size1, size2
-    println("New random contraction")
     val newNodes: MutableSet<KragerNode> = nodes.map { setOf(it) }.toMutableSet()
     val newEdges: MutableList<KragerEdge> = edges.map { Pair(setOf(it.first), setOf(it.second)) }.toMutableList()
 
@@ -51,7 +51,6 @@ private fun contract(nodes: Set<String>, edges: List<Edge>): Triple<Int, Int, In
         newEdges.addAll(updatedEdges)
     }
 
-    println("Done contracting, edges left: ${newEdges.size}")
     val group1 = newNodes.first()
     val group2 = newNodes.last()
     return Triple(newEdges.size, group1.size, group2.size)
@@ -78,11 +77,17 @@ private fun part2(input: List<String>): Int {
 }
 
 fun main() {
-    testPart1()
-    runPart1()
+    println("Day $DAY")
 
-//    testPart2()
-//    runPart2()
+    println("Testing Part 1...")
+    testPart1()
+    println("Running Part 1...")
+    val part1Time = measureTime {
+        runPart1()
+    }
+    println("Part 1 time: $part1Time")
+
+    println("No part 2")
 }
 
 /**

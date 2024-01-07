@@ -4,6 +4,7 @@ import utils.readInput
 import utils.times
 import kotlin.math.max
 import kotlin.math.min
+import kotlin.time.measureTime
 
 private const val DAY = "18"
 private const val SOLUTION_TEST_1 = 62
@@ -104,14 +105,10 @@ private fun calculateArea(corners: List<Pair<Int, Int>>): Long {
         .pushedToPositive()
         .sortedWith(compareBy({ it.first }, { it.second }))
 
-    println("Corners:")
-    sortedCorners.forEach(::println)
-
     var totalArea = 0L
     val currentRangesInside = mutableListOf<IntRange>()
     while (sortedCorners.isNotEmpty()) {
         val row = sortedCorners.first().first
-        println("On row: $row")
         var areaOfThisLine = currentRangesInside.sumOf { it.areaInsideInclusive() }.toLong()
 
         val rangesOnThisRow = sortedCorners.filter { it.first == row }
@@ -180,11 +177,23 @@ private fun part2(input: List<String>): Long {
 }
 
 fun main() {
-    testPart1()
-    runPart1()
+    println("Day $DAY")
 
+    println("Testing Part 1...")
+    testPart1()
+    println("Running Part 1...")
+    val part1Time = measureTime {
+        runPart1()
+    }
+    println("Part 1 time: $part1Time")
+
+    println("Testing Part 2...")
     testPart2()
-    runPart2()
+    println("Running Part 2...")
+    val part2Time = measureTime {
+        runPart2()
+    }
+    println("Part 2 time: $part2Time")
 }
 
 /**

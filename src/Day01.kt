@@ -1,5 +1,6 @@
 import utils.println
 import utils.readInput
+import kotlin.time.measureTime
 
 fun main() {
 
@@ -50,6 +51,13 @@ fun main() {
     check(part2(testInput2) == 299) // Added one testcase: "xyz1threeight" -> 18
 
     val input = readInput("Day01")
-    part1(input).println()
-    part2(input).println()
+    val part1Time = measureTime {
+        part1(input).println()
+    }
+    println("Part 1 time: $part1Time")
+
+    val part2Time = measureTime {
+        part2(input).println()
+    }
+    println("Part 2 time: $part2Time")
 }

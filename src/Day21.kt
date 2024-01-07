@@ -1,5 +1,6 @@
 import utils.*
 import kotlin.math.max
+import kotlin.time.measureTime
 
 private const val DAY = "21"
 private const val SOLUTION_TEST_1 = 16
@@ -105,7 +106,7 @@ private fun part1(input: List<String>, numberOfSteps: Int): Int {
  * Generating new test data using part 1.
  */
 private fun part2TestData(input: List<String>, numberOfSteps: Int): Long {
-    val (grid, startPosition) = parseInput(input)
+    val (grid, _) = parseInput(input)
     val bigGrid = grid.repeat(3, 3).toMutableGrid()
     return bruteForce(bigGrid, numberOfSteps)
 }
@@ -130,20 +131,16 @@ private fun part2TestData(input: List<String>, numberOfSteps: Int): Long {
 
 private fun part2(input: List<String>, numberOfSteps: Long): Long {
     val (immutableGrid, center) = parseInput(input)
-    println("Grid: ${immutableGrid.dimensions}, start: $center")
     val grid = immutableGrid.toMutableGrid()
-    val stepsMod2 = (numberOfSteps % 2).toInt()
 
     val length = grid.size // X
     val startToEdge = (grid.size - 1) / 2 // x
-    val startToCorner = startToEdge * 2 // 2x
 
     var total = 0L
 
     // Start tile
     val fromCenter = grid.copy().toMutableGrid()
     total += bruteForce(fromCenter, numberOfSteps.toInt())
-    println("TOTAL += startTile: $total (+${bruteForce(fromCenter, numberOfSteps.toInt())})")
 
     // Straight direction tiles (up, right, down, left)
     val straightGrids = List(4) { grid.copy().toMutableGrid() }
@@ -165,32 +162,22 @@ private fun part2(input: List<String>, numberOfSteps: Long): Long {
         grid.fold(0) { acc, value -> max(acc, value) }
     }
 
-    println("Straight, odd: $reachableStraightOdd")
-    println("Straight, even: $reachableStraightEven")
-    println("Straight, neededToFill: $straightNeededToFill")
-
     val stepsAtFirstStraightTile = numberOfSteps - startToEdge - 1
-    println("stepsAtFirstStraightTile: $stepsAtFirstStraightTile")
     val stepsLeftLastStraightTile = stepsAtFirstStraightTile % length
-    println("Straight steps left last tile: $stepsLeftLastStraightTile")
-    println("Straight steps left second last tile: ${stepsLeftLastStraightTile + length}, needed to fill: ${straightNeededToFill[0]}")
     val reachableLastTile = straightGrids.map { grid ->
         grid.count { it in 0..stepsLeftLastStraightTile && it.toLong() % 2 == stepsLeftLastStraightTile % 2 }
     }
 
     // Last straight tiles
     total += reachableLastTile.sum()
-    println("TOTAL += lastStraight: $total (+${reachableLastTile.sum()} [$reachableLastTile])")
 
     // Full straight tiles
     val fullTilesStraight = stepsAtFirstStraightTile / length
-    println("FullTilesStraight = $fullTilesStraight")
     val oddTilesStraight = fullTilesStraight / 2 + (fullTilesStraight % 2)
     val evenTilesStraight = fullTilesStraight / 2
     val fullStraightTotal = reachableStraightOdd.sum() * oddTilesStraight +
             reachableStraightEven.sum() * evenTilesStraight
     total += fullStraightTotal
-    println("TOTAL += fullStraight: $total (+${fullStraightTotal})")
 
 
     // Diagonal direction tiles (up-right, right-down, down-left, left-up)
@@ -213,57 +200,55 @@ private fun part2(input: List<String>, numberOfSteps: Long): Long {
         grid.fold(0) { acc, value -> max(acc, value) }
     }
 
-    println("Diagonal, odd: $reachableDiagonalOdd")
-    println("Diagonal, even: $reachableDiagonalEven")
-    println("Diagonal, neededToFill: $diagonalNeededToFill")
-
     // Tiles at (1,1), (2,2), (1,3), (3,1), (3,3), etc.
     val stepsAtFirstDiagonalTile = numberOfSteps - (length + 1)
-    println("stepsAtFirstDiagonalTile: $stepsAtFirstDiagonalTile")
     val stepsLeftLastDiagonalTile = stepsAtFirstDiagonalTile % (2 * length)
-    println("Diagonal steps left last tile: $stepsLeftLastDiagonalTile")
     val reachableLastDiagonalTile = diagonalGrids.map { grid ->
         grid.count { it in 0..stepsLeftLastDiagonalTile && it % 2 == stepsLeftLastDiagonalTile.toInt() % 2 }
     }
 
     // Tiles at (2,1), (1,2), (2,3), (3,2) etc.
     val stepsAtFirstDiagonal2Tile = numberOfSteps - (2 * length + 1)
-    println("stepsAtFirstDiagonal2Tile: $stepsAtFirstDiagonal2Tile")
     val stepsLeftLastDiagonal2Tile = stepsAtFirstDiagonal2Tile % (2 * length)
-    println("Diagonal2 steps left last tile: $stepsLeftLastDiagonal2Tile")
     val reachableLastDiagonal2Tile = diagonalGrids.map { grid ->
         grid.count { it in 0..stepsLeftLastDiagonal2Tile && it % 2 == stepsLeftLastDiagonal2Tile.toInt() % 2 }
     }
 
     // Last diagonal tiles
     total += reachableLastDiagonalTile.sum() * fullTilesStraight
-    println("TOTAL += lastDiagonal: $total (+${reachableLastDiagonalTile.sum()})")
     total += reachableLastDiagonal2Tile.sum() * (fullTilesStraight + 1)
-    println("TOTAL += lastDiagonal2: $total (+${reachableLastDiagonal2Tile.sum()})")
 
     // total + completeDiagonal * 4
     val fullTilesDiagonal = List(fullTilesStraight.toInt()) { it.toLong() / 2 }.sum()
-    println("Full diagonal tiles 1: $fullTilesDiagonal")
     val fullTilesDiagonal2 = List(fullTilesStraight.toInt() + 1) { it.toLong() / 2 }.sum()
-    println("Full diagonal tiles 2: $fullTilesDiagonal2")
 
     val fulldiagonalTotal = reachableDiagonalOdd.sum() * fullTilesDiagonal
     total += fulldiagonalTotal
-    println("TOTAL += fullDiagonal: $total (+${fulldiagonalTotal})")
 
     val fulldiagonal2Total = reachableDiagonalEven.sum() * fullTilesDiagonal2
     total += fulldiagonal2Total
-    println("TOTAL += fullDiagonal2: $total (+${fulldiagonal2Total})")
 
     return total
 }
 
 fun main() {
-    testPart1()
-    runPart1()
+    println("Day $DAY")
 
+    println("Testing Part 1...")
+    testPart1()
+    println("Running Part 1...")
+    val part1Time = measureTime {
+        runPart1()
+    }
+    println("Part 1 time: $part1Time")
+
+    println("Testing Part 2...")
     testPart2(11)
-    runPart2()
+    println("Running Part 2...")
+    val part2Time = measureTime {
+        runPart2()
+    }
+    println("Part 2 time: $part2Time")
 }
 
 /**

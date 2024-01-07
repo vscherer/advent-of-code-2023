@@ -1,6 +1,7 @@
 import utils.GridDirection
 import utils.GridDirection.*
 import utils.readInput
+import kotlin.time.measureTime
 
 private const val DAY = "10"
 private const val SOLUTION_TEST_1 = 8
@@ -214,7 +215,6 @@ private fun dilute(grid: StringGrid): StringGrid {
 
 private fun part1(input: List<String>): Int {
     val paddedGrid = input.padWith('.')
-    paddedGrid.forEach(::println)
     val start = findStart(paddedGrid)
     println("Start: $start")
     return countPath(paddedGrid, start) / 2
@@ -222,19 +222,11 @@ private fun part1(input: List<String>): Int {
 
 private fun part2(input: List<String>): Int {
     val paddedGrid = input.padWith('.')
-    println("\nInput grid:")
-    paddedGrid.forEach(::println)
 
     val start = findStart(paddedGrid)
-    println("Start: $start")
-
     val loopOnlyGrid = paintPath(paddedGrid, start)
-    println("\nOnly loop grid:")
-    loopOnlyGrid.forEach(::println)
 
     val zoomedGrid = loopOnlyGrid.zoomByThree()
-    println("\nZoomed grid:")
-    zoomedGrid.forEach(::println)
 
     var currentGrid = zoomedGrid.padWith('O').padWith('O').padWith('O')
     var dilutedGrid = dilute(currentGrid)
@@ -243,26 +235,30 @@ private fun part2(input: List<String>): Int {
         currentGrid = dilutedGrid
         dilutedGrid = dilute(currentGrid)
     }
-    println("\nMarked grid:")
-    currentGrid.forEach(::println)
 
     val shrunkGrid = currentGrid.shrinkByThree()
-    println("\nShrunk grid:")
-    shrunkGrid.forEach(::println)
 
     return shrunkGrid.joinToString("").count { it == ',' }
 }
 
 fun main() {
-    println("\n PART 1 TEST\n")
-    testPart1()
-    println("\n PART 1 \n")
-    runPart1()
+    println("Day $DAY")
 
-    println("\n PART 2 TEST\n")
+    println("Testing Part 1...")
+    testPart1()
+    println("Running Part 1...")
+    val part1Time = measureTime {
+        runPart1()
+    }
+    println("Part 1 time: $part1Time")
+
+    println("Testing Part 2...")
     testPart2()
-    println("\n PART 2 \n")
-    runPart2()
+    println("Running Part 2...")
+    val part2Time = measureTime {
+        runPart2()
+    }
+    println("Part 2 time: $part2Time")
 }
 
 /**
