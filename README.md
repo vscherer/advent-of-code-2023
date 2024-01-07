@@ -9,12 +9,6 @@ If you're stuck with Kotlin-specific questions or anything related to this templ
 - [Kotlin Slack][slack]
 - Template [issue tracker][issues]
 
-[^aoc]:
-[Advent of Code][aoc] – An annual event of Christmas-oriented programming challenges started December 2015.
-Every year since then, beginning on the first day of December, a programming puzzle is published every day for
-twenty-five days.
-You can solve the puzzle and provide an answer using the language of your choice.
-
 # Timings
 
 On an i7-7700k machine:
@@ -89,6 +83,12 @@ On an i7-7700k machine:
     Part 2 time: 23.697ms
     Day 25
     Part 1 time: 24.654s // Karger's algorithm; fluctuates highly
+
+[^aoc]:
+[Advent of Code][aoc] – An annual event of Christmas-oriented programming challenges started December 2015.
+Every year since then, beginning on the first day of December, a programming puzzle is published every day for
+twenty-five days.
+You can solve the puzzle and provide an answer using the language of your choice.
 
 [aoc]: https://adventofcode.com
 
